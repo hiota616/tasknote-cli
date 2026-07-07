@@ -14,16 +14,29 @@ def meny():
 
         try:
             mode = int(input())
-            if mode == 1:
-                new_note = create_note()
-                write_file_note(new_note)
         except Exception as error:
             print(f'An error occurred: {error}')
         else:
             return mode
-    
+        return None
+        
+def get_data():
+    root = os.getcwd()
+    note_file_path = os.path.join(root, 'notes.json')
+    try:
+        with open(note_file_path, 'r', encoding='utf-8') as json_file:
+            if json_file:
+                data = json.load(json_file)
+    except PermissionError:
+        print('You do not have permission to view this note.')
+    except OSError:
+        print('System error while reading a note')
+    else:
+        return data
+    return {}
 
-def create_note():
+
+def create_note(notes):
     try:
         id = uuid.uuid4().hex
         title = input('Enter a note title: ')
@@ -41,8 +54,9 @@ def create_note():
                 'updated_at': updated_at,
                 'deadline': deadline,
                 'status': status
-            }
+            },
         }
+    
     except Exception as error:
         print(f'An error occurred while creating the note: {error}')
         return {}
@@ -55,7 +69,7 @@ def write_file_note(note):
     root = os.getcwd()
     note_file_path = os.path.join(root, 'notes.json')
     try:
-        with open(note_file_path, 'a', encoding='utf-8') as note_file:
+        with open(note_file_path, 'w', encoding='utf-8') as note_file:
             json.dump(note, note_file)
     
     except PermissionError:
@@ -64,7 +78,11 @@ def write_file_note(note):
         print('System error while creating a note')
 
 def main():
-    meny()
+    mode = meny()
+    if mode == 1:
+        notes_file = get_data()
+        note = create_note(notes_file)
+        write_file_note(note)
 
 
 main()    
