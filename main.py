@@ -5,21 +5,22 @@ from datetime import datetime
 
 
 def meny():
-    print('Select an action:')
-    print('1 - Create a new note')
-    print('2 - Edit an existing note')
-    print('3 - Delete the note')
-    print('0 - Close the program')
+    while True:
+        print('Select an action:')
+        print('1 - Create a new note')
+        print('2 - Edit an existing note')
+        print('3 - Delete the note')
+        print('0 - Close the program')
 
-    try:
-        mode = int(input())
-        if mode == 1:
-            new_note = create_note()
-            write_file_note(new_note)
-    except Exception as error:
-        print(f'An error occurred: {error}')
-    else:
-        return mode
+        try:
+            mode = int(input())
+            if mode == 1:
+                new_note = create_note()
+                write_file_note(new_note)
+        except Exception as error:
+            print(f'An error occurred: {error}')
+        else:
+            return mode
     
 
 def create_note():
@@ -27,7 +28,7 @@ def create_note():
         id = uuid.uuid4().hex
         title = input('Enter a note title: ')
         text_note = input('Enter the note text: ')
-        created_at =  datetime.now()
+        created_at =  str(datetime.now())
         updated_at = None
         deadline = input('Please specify a deadline: ')
         status = 'in process'
@@ -55,7 +56,7 @@ def write_file_note(note):
     note_file_path = os.path.join(root, 'notes.json')
     try:
         with open(note_file_path, 'a', encoding='utf-8') as note_file:
-            note_file.write(note)
+            json.dump(note, note_file)
     
     except PermissionError:
         print('You do not have permission to create a note.')
