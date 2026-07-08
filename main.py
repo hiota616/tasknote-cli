@@ -27,23 +27,31 @@ def main_menu():
 def get_data():
     root = os.getcwd()
     note_file_path = os.path.join(root, 'notes.json')
+    
     try:
         if os.path.isfile(note_file_path):
             with open(note_file_path, 'r', encoding='utf-8') as json_file:
-                if json_file:
-                    data = json.load(json_file)
-                    return data
+                data = json.load(json_file)
+                if not isinstance(data, dict):
+                    return None
+                
+                return data
 
         else:
             with open(note_file_path, 'w', encoding='utf-8') as json_file:
                 json.dump({}, json_file)
                 return {}
+
+    except json.decoder.JSONDecodeError:
+        return None
     except PermissionError:
-            print('You do not have permission to view this note.')
+        print('You do not have permission to view this note.')
+        return None
     except OSError:
         print('System error while reading a note')
+        return None
     
-
+    
 
 def write_file_note(note):
     root = os.getcwd()
@@ -146,6 +154,11 @@ def main():
         mode = main_menu()
         if mode == 1:
             notes_file = get_data()
+
+            if notes_file is None:
+                print('Program stopped: notes data was not loaded.')
+                break
+            
             note = create_note(notes_file)
             if note:
                 write_file_note(note)
