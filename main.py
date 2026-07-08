@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 
-def menu():
+def main_menu():
     print('Select an action:')
     print('1 - Create a new note')
     print('2 - View notes')
@@ -14,12 +14,12 @@ def menu():
 
     try:
         mode = int(input())
-    except Exception as error:
+    except ValueError as error:
         print(f'An error occurred: {error}')
     else:
         return mode
     return None
-        
+
 def get_data():
     root = os.getcwd()
     note_file_path = os.path.join(root, 'notes.json')
@@ -34,6 +34,19 @@ def get_data():
     else:
         return data
     return {}
+
+
+def write_file_note(note):
+    root = os.getcwd()
+    note_file_path = os.path.join(root, 'notes.json')
+    try:
+        with open(note_file_path, 'w', encoding='utf-8') as note_file:
+            json.dump(note, note_file)
+    
+    except PermissionError:
+        print('You do not have permission to create a note.')
+    except OSError:
+        print('System error while creating a note')
 
 
 def create_note(notes):
@@ -61,39 +74,54 @@ def create_note(notes):
         return notes
 
 
+def print_notes(key, values):
+    print(f'Post Title: {values['title']}')
+    print(f'Note: {values['text_note']}')
+    print(f'Date and time of creation: {values['created_at'][0]} at {values['created_at'][1]} ')
+    if values['updated_at'] is not None:
+        print(f'Date and time of last edited: {values['updated_at'][0]} at {values['updated_at'][1]}')
+    print(f'Deadline: {values['deadline']}')
+    print(f'Status: {values['status']}')
+    print('-' * 40)
+
+def view_menu():
+    print('1 - Show "In Progress" status.')
+    print('2 - Show "Completed" status.')
+    print('3 - Show "Archive" status.')
+    print('4 - View all notes.')
+    print('0 - Return to the main menu.')
+    try:
+        view_mode = int(input())
+    except ValueError as error:
+        print(f'An error occurred: {error}')
+    else:
+        return view_mode
+    return None
+    
+
 def view_notes():
     notes = get_data()
+    view_mode = view_menu()
     print('-' * 40)
     for key, values in notes.items():
-        print(f'Post Title: {values['title']}')
-        print(f'Note: {values['text_note']}')
-        print(f'Date and time of creation: {values['created_at'][0]} at {values['created_at'][1]} ')
-        if values['updated_at'] is not None:
-            print(f'Date and time of last edited: {values['updated_at'][0]} at {values['updated_at'][1]}')
-        print(f'Deadline: {values['deadline']}')
-        print(f'Status: {values['status']}')
-        print('-' * 40)
-    
-
-# def delete_note(notes, id):
-
-
-def write_file_note(note):
-    root = os.getcwd()
-    note_file_path = os.path.join(root, 'notes.json')
-    try:
-        with open(note_file_path, 'w', encoding='utf-8') as note_file:
-            json.dump(note, note_file)
-    
-    except PermissionError:
-        print('You do not have permission to create a note.')
-    except OSError:
-        print('System error while creating a note')
+        if view_mode == 1:
+            if values['status'] == 'in_process':
+                print_notes(key, values)
+        elif view_mode == 2:
+            if values['status'] == 'done':
+                print_notes(key, values)
+        elif view_mode == 3:
+            if values['status'] == 'archived':
+                print_notes(key, values)
+        elif view_mode == 4:
+            print_notes(key, values)
+        elif view_mode == 0:
+            main_menu()
 
 
 def main():
     while True:
-        mode = menu()
+        mode = main_menu()
         if mode == 1:
             notes_file = get_data()
             note = create_note(notes_file)
