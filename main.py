@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 
-def meny():
+def menu():
     print('Select an action:')
     print('1 - Create a new note')
     print('2 - View notes')
@@ -41,7 +41,7 @@ def create_note(notes):
         note_id = uuid.uuid4().hex
         title = input('Enter a note title: ')
         text_note = input('Enter the note text: ')
-        created_at =  str(datetime.now())
+        created_at =  datetime.now().isoformat().split('T')
         updated_at = None
         deadline = input('Please specify a deadline: ')
         status = 'in_process'
@@ -57,14 +57,23 @@ def create_note(notes):
 
     except Exception as error:
         print(f'An error occurred while creating the note: {error}')
-    else:
+    finally:
         return notes
 
 
 def view_notes():
     notes = get_data()
+    print('-' * 40)
     for key, values in notes.items():
-        print(f'{values['title']}')
+        print(f'Post Title: {values['title']}')
+        print(f'Note: {values['text_note']}')
+        print(f'Date and time of creation: {values['created_at'][0]} at {values['created_at'][1]} ')
+        if values['updated_at'] is not None:
+            print(f'Date and time of last edited: {values['updated_at'][0]} at {values['updated_at'][1]}')
+        print(f'Deadline: {values['deadline']}')
+        print(f'Status: {values['status']}')
+        print('-' * 40)
+    
 
 # def delete_note(notes, id):
 
@@ -84,7 +93,7 @@ def write_file_note(note):
 
 def main():
     while True:
-        mode = meny()
+        mode = menu()
         if mode == 1:
             notes_file = get_data()
             note = create_note(notes_file)
