@@ -5,6 +5,9 @@ from datetime import datetime
 
 
 def main_menu():
+    print('*' * 9)
+    print('MAIN MENU')
+    print('*' * 9)
     print('Select an action:')
     print('1 - Create a new note')
     print('2 - View notes')
@@ -19,6 +22,7 @@ def main_menu():
     else:
         return mode
     return None
+
 
 def get_data():
     root = os.getcwd()
@@ -51,30 +55,41 @@ def write_file_note(note):
 
 def create_note(notes):
     try:
-        note_id = uuid.uuid4().hex
-        title = input('Enter a note title: ')
-        text_note = input('Enter the note text: ')
-        created_at =  datetime.now().isoformat().split('T')
-        updated_at = None
-        deadline = input('Please specify a deadline: ')
-        status = 'in_process'
+        if isinstance(notes, dict):
+            note_id = uuid.uuid4().hex
+            title = input('Enter a note title: ')
+            text_note = input('Enter the note text: ')
+            if not title or not text_note:
+                raise ValueError('Empty fields: Header or Text')
+            created_at =  datetime.now().isoformat().split('T')
+            updated_at = None
+            deadline = input('Please specify a deadline: ')
+            if not deadline:
+                deadline = None
+            status = 'in_process'
 
-        notes[note_id] = {
-                'title': title,
-                'text_note': text_note,
-                'created_at': created_at,
-                'updated_at': updated_at,
-                'deadline': deadline,
-                'status': status
-            }
-
-    except Exception as error:
+            notes[note_id] = {
+                    'title': title,
+                    'text_note': text_note,
+                    'created_at': created_at,
+                    'updated_at': updated_at,
+                    'deadline': deadline,
+                    'status': status
+                }
+        else:
+            raise TypeError('The JSON file does not contain a dictionary')
+    except TypeError as error:
         print(f'An error occurred while creating the note: {error}')
-    finally:
+        return False
+    except ValueError as error:
+        print(f'An error occurred while creating the note: {error}')
+        return notes
+    else:
         return notes
 
 
 def print_notes(key, values):
+    print('-' * 40)
     print(f'Post Title: {values['title']}')
     print(f'Note: {values['text_note']}')
     print(f'Date and time of creation: {values['created_at'][0]} at {values['created_at'][1]} ')
@@ -82,9 +97,12 @@ def print_notes(key, values):
         print(f'Date and time of last edited: {values['updated_at'][0]} at {values['updated_at'][1]}')
     print(f'Deadline: {values['deadline']}')
     print(f'Status: {values['status']}')
-    print('-' * 40)
+    
 
 def view_menu():
+    print('*' * 9)
+    print('VIEW MENU')
+    print('*' * 9)
     print('1 - Show "In Progress" status.')
     print('2 - Show "Completed" status.')
     print('3 - Show "Archive" status.')
@@ -102,7 +120,6 @@ def view_menu():
 def view_notes():
     notes = get_data()
     view_mode = view_menu()
-    print('-' * 40)
     for key, values in notes.items():
         if view_mode == 1:
             if values['status'] == 'in_process':
@@ -116,7 +133,7 @@ def view_notes():
         elif view_mode == 4:
             print_notes(key, values)
         elif view_mode == 0:
-            main_menu()
+            break
 
 
 def main():
@@ -125,7 +142,10 @@ def main():
         if mode == 1:
             notes_file = get_data()
             note = create_note(notes_file)
-            write_file_note(note)
+            if note:
+                write_file_note(note)
+            else:
+                print('Error')
         elif mode == 2:
             view_notes()
         elif mode == 3:
