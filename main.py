@@ -154,7 +154,7 @@ def get_titles(notes):
     return titles
 
 
-def find_title(notes, title):
+def search_note_by_title(notes, title):
     for key, values in notes.items():
         if values['title'] == title:
             return key
@@ -177,11 +177,71 @@ def delete_menu():
     
 
 def delete_note(notes_data, title_name):
-    note_id = find_title(notes_data, title_name)
+    note_id = search_note_by_title(notes_data, title_name)
     notes_data.pop(note_id)
     write_file_note(notes_data)
     print(f'The note "{title_name}" has been deleted from the database.')\
+        
 
+def edit_note_value(notes, id_note, change_value, new_data):
+    notes[id_note][change_value] = new_data
+    return notes
+
+
+def edit_note_menu():
+    print('EDIT MENU')
+    notes = get_data()
+    titles = get_titles(notes)
+
+    title = inquirer.select(
+        message='Select a note:',
+        choices=titles
+    ).execute()
+
+    edit_mode = inquirer.select(
+        message='Select an action:',
+        choices=[
+            {'name': 'Change the title', 'value': 'title'},
+            {'name': 'Change the description', 'value': 'text_note'},
+            {'name': 'Change the deadline', 'value': 'deadline'},
+            {'name': 'Change the status', 'value': 'edit_status'},
+            {'name': 'Return to the main menu', 'value': 'status'}
+            ]
+    ).execute()
+
+    note_id = search_note_by_title(notes, title)
+    
+    try:
+        if edit_mode == 'title':
+            new_data = input('Enter a new title: ')
+            if not new_data:
+                raise ValueError('Empty fields: Header')
+            edit_note_value()
+        elif edit_mode == 'text_note':
+            new_data = input('Enter a new description: ')
+            if not new_data:
+                raise ValueError('Empty fields: Description')
+            
+        elif edit_mode == 'deadline':
+            new_data = input('Enter a new deadline: ')
+
+        elif edit_mode == 'status':
+            new_data = inquirer.select(
+                message='Select a status:',
+                choices=[
+                    {'name': 'In the process', 'value': 'in_process'},
+                    {'name': 'Done', 'value': 'done'},
+                    {'name': 'Archive', 'value': 'archived'},
+                ]
+            ).execute()
+
+        elif edit_mode == 'return_to_main':
+            pass
+
+        notes = edit_note_value(notes, note_id, edit_mode, new_data)
+        write_file_note(notes)
+    except ValueError as error:
+        print(f'An error occurred while edit the note: {error}')
 
 
 def main():
