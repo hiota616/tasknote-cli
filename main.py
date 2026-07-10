@@ -1,27 +1,23 @@
 import os
 import uuid
 import json
+from InquirerPy import inquirer
 from datetime import datetime
 
 
 def main_menu():
-    print('*' * 9)
-    print('MAIN MENU')
-    print('*' * 9)
-    print('Select an action:')
-    print('1 - Create a new note')
-    print('2 - View notes')
-    print('3 - Delete the note')
-    print('4 - Edit an existing note')
-    print('0 - Close the program')
+    mode = inquirer.select(
+        message='Select an action:',
+        choices=[
+            {'name': 'Create a new note', 'value': 'create'},
+            {'name': 'View notes', 'value': 'view'},
+            {'name': 'Delete the note', 'value': 'delete'},
+            {'name': 'Edit an existing note', 'value': 'edit'},
+            {'name': 'Close the program', 'value': 'close'},
+            ]
+    ).execute()
 
-    try:
-        mode = int(input())
-    except ValueError:
-        print('Incorrect command.')
-    else:
-        return mode
-    return None
+    return mode
 
 
 def get_data():
@@ -116,75 +112,79 @@ def print_note(key, values):
     
 
 def view_menu():
-    print('*' * 9)
     print('VIEW MENU')
-    print('*' * 9)
-    print('1 - Show "In Progress" status.')
-    print('2 - Show "Completed" status.')
-    print('3 - Show "Archive" status.')
-    print('4 - View all notes.')
-    print('0 - Return to the main menu.')
-    try:
-        view_mode = int(input())
-    except ValueError:
-        print('Incorrect command.')
-    else:
-        return view_mode
-    return None
-    
+    view_mode = inquirer.select(
+        message='Select an action:',
+        choices=[
+            {'name': 'Show "In Progress" status', 'value': 'in_process'},
+            {'name': 'Show "Completed" status', 'value': 'done'},
+            {'name': 'Show "Archive" status', 'value': 'archived'},
+            {'name': 'View all notes', 'value': 'all'},
+            {'name': 'Return to the main menu', 'value': 'return_to_main'},
+            ]
+    ).execute()
+
+    return view_mode
+
 
 def view_notes():
     notes = get_data()
     view_mode = view_menu()
     for key, values in notes.items():
-        if view_mode == 1:
-            if values['status'] == 'in_process':
+        if view_mode == 'in_process':
+            if values['status'] == view_mode:
                 print_note(key, values)
-        elif view_mode == 2:
-            if values['status'] == 'done':
+        elif view_mode == 'done':
+            if values['status'] == view_mode:
                 print_note(key, values)
-        elif view_mode == 3:
-            if values['status'] == 'archived':
+        elif view_mode == 'archived':
+            if values['status'] == view_mode:
                 print_note(key, values)
-        elif view_mode == 4:
+        elif view_mode == 'all':
             print_note(key, values)
-        elif view_mode == 0:
+        elif view_mode == 'return_to_main':
             break
+    print('-' * 40)
                 
+
+def get_titles(notes):
+    titles = []
+    for key, values in notes.items():
+        titles.append(values['title'])
+    return titles
 
 def find_title(notes, title):
     for key, values in notes.items():
         if values['title'] == title:
             return key
-    
+
     print('The title is incorrect or is missing from the database.')
     return None
 
 def delete_menu():
-    print('*' * 9)
     print('DELETE MENU')
-    print('*' * 9)
-    try:
-        title = input('Enter the title of the note you want to delete: ')
-        if not title:
-            raise ValueError('No title was entered.')
-        return title
-    except ValueError as error:
-        print(error)
+    notes = get_data()
+    titles = get_titles(notes)
+    title_note = inquirer.select(
+        message='Select which note to delete:',
+        choices= titles
+    ).execute()
+    return notes, title_note
+    
+        
 
 
 def delete_note():
-    title_name = delete_menu()
-    notes_data = get_data()
+    notes_data, title_name = delete_menu()
     note_id = find_title(notes_data, title_name)
-    if note_id is not None:
-        notes_data.pop(note_id)
-        write_file_note(notes_data)
+    notes_data.pop(note_id)
+    write_file_note(notes_data)
+    print(f'The note "{title_name}" has been deleted from the database.')
 
 def main():
     while True:
         mode = main_menu()
-        if mode == 1:
+        if mode == 'create':
             notes_file = get_data()
 
             if notes_file is None:
@@ -196,11 +196,11 @@ def main():
                 write_file_note(note)
             else:
                 pass
-        elif mode == 2:
+        elif mode == 'view':
             view_notes()
-        elif mode == 3:
+        elif mode == 'delete':
             delete_note()
-        elif mode == 0:
+        elif mode == 'close':
             break
 
 main()    
