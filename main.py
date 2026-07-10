@@ -153,6 +153,7 @@ def get_titles(notes):
         titles.append(values['title'])
     return titles
 
+
 def find_title(notes, title):
     for key, values in notes.items():
         if values['title'] == title:
@@ -161,25 +162,27 @@ def find_title(notes, title):
     print('The title is incorrect or is missing from the database.')
     return None
 
+
 def delete_menu():
     print('DELETE MENU')
     notes = get_data()
     titles = get_titles(notes)
+    titles.append({'name': 'Return to the main menu', 'value': 'return_to_main'})
     title_note = inquirer.select(
         message='Select which note to delete:',
         choices= titles
     ).execute()
-    return notes, title_note
+    if title_note != 'return_to_main':
+        delete_note(notes, title_note)
     
-        
 
-
-def delete_note():
-    notes_data, title_name = delete_menu()
+def delete_note(notes_data, title_name):
     note_id = find_title(notes_data, title_name)
     notes_data.pop(note_id)
     write_file_note(notes_data)
-    print(f'The note "{title_name}" has been deleted from the database.')
+    print(f'The note "{title_name}" has been deleted from the database.')\
+
+
 
 def main():
     while True:
@@ -199,7 +202,9 @@ def main():
         elif mode == 'view':
             view_notes()
         elif mode == 'delete':
-            delete_note()
+            delete_menu()
+        elif mode == 'edit':
+            edit_note_menu()
         elif mode == 'close':
             break
 
