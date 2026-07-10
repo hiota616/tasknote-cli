@@ -204,8 +204,8 @@ def edit_note_menu():
             {'name': 'Change the title', 'value': 'title'},
             {'name': 'Change the description', 'value': 'text_note'},
             {'name': 'Change the deadline', 'value': 'deadline'},
-            {'name': 'Change the status', 'value': 'edit_status'},
-            {'name': 'Return to the main menu', 'value': 'status'}
+            {'name': 'Change the status', 'value': 'status'},
+            {'name': 'Return to the main menu', 'value': 'return_to_main'}
             ]
     ).execute()
 
@@ -216,7 +216,6 @@ def edit_note_menu():
             new_data = input('Enter a new title: ')
             if not new_data:
                 raise ValueError('Empty fields: Header')
-            edit_note_value()
         elif edit_mode == 'text_note':
             new_data = input('Enter a new description: ')
             if not new_data:
@@ -239,7 +238,9 @@ def edit_note_menu():
             pass
 
         notes = edit_note_value(notes, note_id, edit_mode, new_data)
+        notes[note_id]['updated_at'] = datetime.now().isoformat().split('T')
         write_file_note(notes)
+
     except ValueError as error:
         print(f'An error occurred while edit the note: {error}')
 
