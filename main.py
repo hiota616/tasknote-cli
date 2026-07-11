@@ -4,20 +4,12 @@ import json
 from InquirerPy import inquirer
 from datetime import datetime
 
-
-def main_menu():
-    mode = inquirer.select(
-        message='Select an action:',
-        choices=[
-            {'name': 'Create a new note', 'value': 'create'},
-            {'name': 'View notes', 'value': 'view'},
-            {'name': 'Delete the note', 'value': 'delete'},
-            {'name': 'Edit an existing note', 'value': 'edit'},
-            {'name': 'Close the program', 'value': 'close'},
-            ]
+def menu(message, options):
+    selector = inquirer.select(
+        message=message,
+        choices=options
     ).execute()
-
-    return mode
+    return selector
 
 
 def get_data():
@@ -99,52 +91,50 @@ def create_note(notes):
 def print_note(key, values):
     try:
         print('-' * 40)
-        print(f'Post Title: {values['title']}')
-        print(f'Note: {values['text_note']}')
-        print(f'Date and time of creation: {values['created_at'][0]} at {values['created_at'][1]} ')
+        print(f"Post Title: {values['title']}")
+        print(f"Note: {values['text_note']}")
+        print(f"Date and time of creation: {values['created_at'][0]} at {values['created_at'][1]}")
         if values['updated_at'] is not None:
-            print(f'Date and time of last edited: {values['updated_at'][0]} at {values['updated_at'][1]}')
-        print(f'Deadline: {values['deadline']}')
-        print(f'Status: {values['status']}')
+            print(f"Date and time of last edited: {values['updated_at'][0]} at {values['updated_at'][1]}")
+        print(f"Deadline: {values['deadline']}")
+        print(f"Status: {values['status']}")
+        if not values:
+            print('Empty.')
 
     except IndexError:
-        print(f'The note "{values['title']}" was recorded incorrectly')
-    
-
-def view_menu():
-    print('VIEW MENU')
-    view_mode = inquirer.select(
-        message='Select an action:',
-        choices=[
-            {'name': 'Show "In Progress" status', 'value': 'in_process'},
-            {'name': 'Show "Completed" status', 'value': 'done'},
-            {'name': 'Show "Archive" status', 'value': 'archived'},
-            {'name': 'View all notes', 'value': 'all'},
-            {'name': 'Return to the main menu', 'value': 'return_to_main'},
-            ]
-    ).execute()
-
-    return view_mode
+        print(f"The note {values['title']} was recorded incorrectly")
 
 
 def view_notes():
     notes = get_data()
-    view_mode = view_menu()
-    for key, values in notes.items():
-        if view_mode == 'in_process':
-            if values['status'] == view_mode:
+    if notes is not None:
+        print('VIEW MENU')
+        view_mode = menu('Select an action:',
+                [
+                {'name': 'Show "In Progress" status', 'value': 'in_process'},
+                {'name': 'Show "Completed" status', 'value': 'done'},
+                {'name': 'Show "Archive" status', 'value': 'archived'},
+                {'name': 'View all notes', 'value': 'all'},
+                {'name': 'Return to the main menu', 'value': 'return_to_main'},
+                ]
+                )
+        for key, values in notes.items():
+            if view_mode == 'in_process':
+                if values['status'] == view_mode:
+                    print_note(key, values)
+            elif view_mode == 'done':
+                if values['status'] == view_mode:
+                    print_note(key, values)
+            elif view_mode == 'archived':
+                if values['status'] == view_mode:
+                    print_note(key, values)
+            elif view_mode == 'all':
                 print_note(key, values)
-        elif view_mode == 'done':
-            if values['status'] == view_mode:
-                print_note(key, values)
-        elif view_mode == 'archived':
-            if values['status'] == view_mode:
-                print_note(key, values)
-        elif view_mode == 'all':
-            print_note(key, values)
-        elif view_mode == 'return_to_main':
-            break
-    print('-' * 40)
+            elif view_mode == 'return_to_main':
+                break
+        print('-' * 40)
+    else:
+        print('Notes data was not loaded.')
                 
 
 def get_titles(notes):
@@ -161,93 +151,93 @@ def search_note_by_title(notes, title):
 
     print('The title is incorrect or is missing from the database.')
     return None
-
-
-def delete_menu():
-    print('DELETE MENU')
-    notes = get_data()
-    titles = get_titles(notes)
-    titles.append({'name': 'Return to the main menu', 'value': 'return_to_main'})
-    title_note = inquirer.select(
-        message='Select which note to delete:',
-        choices= titles
-    ).execute()
-    if title_note != 'return_to_main':
-        delete_note(notes, title_note)
     
 
-def delete_note(notes_data, title_name):
-    note_id = search_note_by_title(notes_data, title_name)
-    notes_data.pop(note_id)
-    write_file_note(notes_data)
-    print(f'The note "{title_name}" has been deleted from the database.')\
-        
+def delete_note():
+    print('DELETE MENU')
+    notes = get_data()
+    if notes is not None:
+        titles = get_titles(notes)
+        titles.append({'name': 'Return to the main menu', 'value': 'return_to_main'})
+        title_note = menu('Select which note to delete:', titles)
+        if title_note != 'return_to_main':
+            note_id = search_note_by_title(notes, title_note)
+            notes.pop(note_id)
+            write_file_note(notes)
+            print(f'The note "{title_note}" has been deleted from the database.')
+    else:
+        print('Notes data was not loaded.')
 
 def edit_note_value(notes, id_note, change_value, new_data):
     notes[id_note][change_value] = new_data
     return notes
 
 
-def edit_note_menu():
+def edit_note():
     print('EDIT MENU')
     notes = get_data()
-    titles = get_titles(notes)
+    if notes is not None:
+        titles = get_titles(notes)
+        try:
+            if not titles:
+                raise ValueError(f'There are no notes that can be edited.')
+            title = menu('Select a note:', titles)
+            edit_mode = menu('Select an action:',
+                    [
+                    {'name': 'Change the title', 'value': 'title'},
+                    {'name': 'Change the description', 'value': 'text_note'},
+                    {'name': 'Change the deadline', 'value': 'deadline'},
+                    {'name': 'Change the status', 'value': 'status'},
+                    {'name': 'Return to the main menu', 'value': 'return_to_main'}
+                    ]
+                    )
 
-    title = inquirer.select(
-        message='Select a note:',
-        choices=titles
-    ).execute()
+            note_id = search_note_by_title(notes, title)
 
-    edit_mode = inquirer.select(
-        message='Select an action:',
-        choices=[
-            {'name': 'Change the title', 'value': 'title'},
-            {'name': 'Change the description', 'value': 'text_note'},
-            {'name': 'Change the deadline', 'value': 'deadline'},
-            {'name': 'Change the status', 'value': 'status'},
-            {'name': 'Return to the main menu', 'value': 'return_to_main'}
-            ]
-    ).execute()
-
-    note_id = search_note_by_title(notes, title)
-    
-    try:
-        if edit_mode == 'title':
-            new_data = input('Enter a new title: ')
-            if not new_data:
-                raise ValueError('Empty fields: Header')
-        elif edit_mode == 'text_note':
-            new_data = input('Enter a new description: ')
-            if not new_data:
-                raise ValueError('Empty fields: Description')
+            if edit_mode != 'return_to_main':
             
-        elif edit_mode == 'deadline':
-            new_data = input('Enter a new deadline: ')
+                if edit_mode == 'title':
+                    new_data = input('Enter a new title: ')
+                    if not new_data:
+                        raise ValueError('Empty fields: Header')
+                elif edit_mode == 'text_note':
+                    new_data = input('Enter a new description: ')
+                    if not new_data:
+                        raise ValueError('Empty fields: Description')
+                    
+                elif edit_mode == 'deadline':
+                    new_data = input('Enter a new deadline: ')
 
-        elif edit_mode == 'status':
-            new_data = inquirer.select(
-                message='Select a status:',
-                choices=[
-                    {'name': 'In the process', 'value': 'in_process'},
-                    {'name': 'Done', 'value': 'done'},
-                    {'name': 'Archive', 'value': 'archived'},
-                ]
-            ).execute()
+                elif edit_mode == 'status':
+                    new_data = menu('Select a status:',
+                            [
+                            {'name': 'In the process', 'value': 'in_process'},
+                            {'name': 'Done', 'value': 'done'},
+                            {'name': 'Archive', 'value': 'archived'},
+                            ]
+                            )
 
-        elif edit_mode == 'return_to_main':
-            pass
+                notes = edit_note_value(notes, note_id, edit_mode, new_data)
+                notes[note_id]['updated_at'] = datetime.now().isoformat().split('T')
+                write_file_note(notes)
 
-        notes = edit_note_value(notes, note_id, edit_mode, new_data)
-        notes[note_id]['updated_at'] = datetime.now().isoformat().split('T')
-        write_file_note(notes)
-
-    except ValueError as error:
-        print(f'An error occurred while edit the note: {error}')
+        except ValueError as error:
+            print(f'An error occurred while edit the note: {error}')
+    else:
+        print('Notes data was not loaded.')
 
 
 def main():
     while True:
-        mode = main_menu()
+        mode = menu('Select an action:',
+            [
+            {'name': 'Create a new note', 'value': 'create'},
+            {'name': 'View notes', 'value': 'view'},
+            {'name': 'Delete the note', 'value': 'delete'},
+            {'name': 'Edit an existing note', 'value': 'edit'},
+            {'name': 'Close the program', 'value': 'close'},
+            ]
+            )
         if mode == 'create':
             notes_file = get_data()
 
@@ -263,9 +253,9 @@ def main():
         elif mode == 'view':
             view_notes()
         elif mode == 'delete':
-            delete_menu()
+            delete_note()
         elif mode == 'edit':
-            edit_note_menu()
+            edit_note()
         elif mode == 'close':
             break
 
