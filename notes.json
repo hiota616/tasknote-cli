@@ -1,1 +1,55 @@
-{"26794abcdd074ccfad551eb7b1e7d37d": {"title": "test3", "text_note": "hbrejnerjrejre", "created_at": ["2026-07-09", "17:56:38.882036"], "updated_at": null, "deadline": "h45h4", "status": "in_process"}, "512c56f84b3e44298c838d34dad12423": {"title": "loooolka", "text_note": "loooool", "created_at": ["2026-07-09", "22:51:19.615471"], "updated_at": ["2026-07-10", "20:31:35.104603"], "deadline": "10:00", "status": "done"}, "deb0cb2d5e6e4bff909f4510d814563e": {"title": "real task", "text_note": "change something", "created_at": ["2026-07-10", "20:35:52.746252"], "updated_at": ["2026-07-11", "18:44:58.471355"], "deadline": null, "status": "done"}, "4d30cadfbbbb4d17a9e8a9811de04414": {"title": "testik42", "text_note": "mamaaaaamia", "created_at": ["2026-07-11", "18:19:08.249936"], "updated_at": ["2026-07-11", "18:20:13.091556"], "deadline": "", "status": "in_process"}}
+{
+    "512c56f84b3e44298c838d34dad12423": {
+        "title": "loooolka",
+        "text_note": "loooool",
+        "created_at": [
+            "2026-07-09",
+            "22:51:19.615471"
+        ],
+        "updated_at": [
+            "2026-07-10",
+            "20:31:35.104603"
+        ],
+        "deadline": "10:00",
+        "status": "done"
+    },
+    "deb0cb2d5e6e4bff909f4510d814563e": {
+        "title": "real task",
+        "text_note": "change something",
+        "created_at": [
+            "2026-07-10",
+            "20:35:52.746252"
+        ],
+        "updated_at": [
+            "2026-07-11",
+            "18:44:58.471355"
+        ],
+        "deadline": null,
+        "status": "done"
+    },
+    "1899b5da32bf46919f92de7a4a2028e7": {
+        "title": "test0",
+        "text_note": "t34g32g3g3g2",
+        "created_at": [
+            "2026-07-11",
+            "19:23:49.143499"
+        ],
+        "updated_at": [
+            "2026-07-11",
+            "19:24:08.230340"
+        ],
+        "deadline": "today",
+        "status": "in_process"
+    },
+    "f1d2781cecfc4ceda25e8be4efe0e4b1": {
+        "title": "gergewqasg",
+        "text_note": "gergwe",
+        "created_at": [
+            "2026-07-12",
+            "13:52:32.256112"
+        ],
+        "updated_at": null,
+        "deadline": "rtehret",
+        "status": "in_process"
+    }
+}
