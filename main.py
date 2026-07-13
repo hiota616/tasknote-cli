@@ -153,20 +153,20 @@ def view_notes():
         print('Notes data was not loaded.')
                 
 
-def get_titles(notes):
-    keys_titles = []
+def get_note_values(notes):
+    data = []
     for key, values in notes.items():
         try:
             if not values['title']:
                 raise ValueError(f'No title. ID: {key}')
-            keys_titles.append((key, values['title']))
+            data.append((key, values['title'], values['text_note'], values['status']))
         except ValueError as error:
             print(f'An error occurred while creating the note: {error}')
 
-    return keys_titles
+    return data
 
 
-def search_note_by_title(notes, title):
+def search_note_by_title(notes, id):
     for key, values in notes.items():
         if values['title'] == title:
             return key
@@ -186,14 +186,16 @@ def delete_note():
         if notes == {}:
             print('There are no notes in the database.')
         else:
-            keys_titles = get_titles(notes)
-            print(keys_titles)
+            values_list = get_note_values(notes)
+            selectors = []
+            for id_note, title, desc, status in values_list:
+                selectors.append({"name": f'{title} - {desc[:40]} | Status: {status} | ID: {id[:8]}', "value": id_note})
             
-            keys_titles.append({'name': 'Return to the main menu', 'value': 'return_to_main'})
-            title_note = menu('Select which note to delete:', keys_titles)
+            
+            selectors.append({'name': 'Return to the main menu', 'value': 'return_to_main'})
+            note_id = menu('Select which note to delete:', selectors)
 
-            if title_note != 'return_to_main':
-                note_id = search_note_by_title(notes, title_note)
+            if note_id != 'return_to_main':
 
                 if note_id is None:
                     raise ValueError('Empty fields: id')
@@ -206,7 +208,7 @@ def delete_note():
                 
             
     except ValueError as error:
-        print(f'An error occurred while creating the note: {error}')
+        print(f'An error occurred while delete the note: {error}')
 
 
 def edit_note_value(notes, id_note, change_value, new_data):
