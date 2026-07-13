@@ -82,8 +82,8 @@ def create_note(notes):
             status = 'in_process'
 
             notes[note_id] = {
-                    'title': title,
-                    'text_note': text_note,
+                    'title': title.strip(),
+                    'text_note': text_note.strip(),
                     'created_at': created_at,
                     'updated_at': updated_at,
                     'deadline': deadline,
@@ -122,7 +122,7 @@ def print_note(values):
 
 def view_notes():
     notes = get_data()
-    if notes is not None or notes != {}:
+    if notes is not None and len(notes) > 0:
         print('VIEW MENU')
         view_mode = menu('Select an action:',
                 [
@@ -134,28 +134,30 @@ def view_notes():
                 ]
                 )
         counter = 0
-        for _, values in notes.items():
-            if view_mode == 'return_to_main':
-                counter = 1
-                break
-            elif view_mode == 'in_process':
-                if values['status'] == view_mode:
-                    counter +=1 
-                    print_note(values)
-                    
-            elif view_mode == 'done':
-                if values['status'] == view_mode:
-                    counter +=1 
-                    print_note(values)
- 
-            elif view_mode == 'archived':
-                if values['status'] == view_mode:
-                    counter +=1 
-                    print_note(values)
+        if view_mode == 'return_to_main':
+            counter = 1
+        else:
+            for _, values in notes.items():
 
-            elif view_mode == 'all':
-                counter +=1
-                print_note(values)
+                
+                if view_mode == 'in_process':
+                    if values['status'] == view_mode:
+                        counter +=1 
+                        print_note(values)
+                        
+                elif view_mode == 'done':
+                    if values['status'] == view_mode:
+                        counter +=1 
+                        print_note(values)
+    
+                elif view_mode == 'archived':
+                    if values['status'] == view_mode:
+                        counter +=1 
+                        print_note(values)
+
+                elif view_mode == 'all':
+                    counter +=1
+                    print_note(values)
         if counter == 0:
             print('There are no notes.')
         else:
@@ -226,7 +228,7 @@ def create_selectors(values_list):
 def edit_note():
     print('EDIT MENU')
     notes = get_data()
-    if notes is not None:
+    if notes is not None and len(notes) > 0:
         values_list = get_note_values(notes)
         selectors = create_selectors(values_list)
         try:
@@ -282,7 +284,7 @@ def edit_note():
         except ValueError as error:
             print(f'An error occurred while edit the note: {error}')
     else:
-        print('Notes data was not loaded.')
+        print('There are no notes in the database.')
 
 
 def main():
