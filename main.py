@@ -31,7 +31,7 @@ def get_data():
                 return {}
             
     except ValueError as error:
-        print(f'An error occurred during recording: {error}')
+        print(f'An error occurred while reading/receiving data {error}')
         return None
     except json.decoder.JSONDecodeError:
         print('The file is corrupted or empty.')
@@ -40,7 +40,7 @@ def get_data():
         print('You do not have permission to view this note.')
         return None
     except OSError:
-        print('System error while reading a note')
+        print('System error while reading/receiving a note')
         return None
      
 
@@ -77,7 +77,7 @@ def create_note(notes):
             created_at =  datetime.now().isoformat().split('T')
             updated_at = None
             deadline = input('Please specify a deadline: ')
-            if not deadline:
+            if not deadline.strip():
                 deadline = None
             status = 'in_process'
 
@@ -101,7 +101,7 @@ def create_note(notes):
         return notes
 
 
-def print_note(key, values):
+def print_note(values):
     try:
         print('-' * 40)
         print(f"Post Title: {values['title']}")
@@ -122,7 +122,7 @@ def print_note(key, values):
 
 def view_notes():
     notes = get_data()
-    if notes is not None:
+    if notes is not None or notes != {}:
         print('VIEW MENU')
         view_mode = menu('Select an action:',
                 [
@@ -133,22 +133,33 @@ def view_notes():
                 {'name': 'Return to the main menu', 'value': 'return_to_main'},
                 ]
                 )
-        for key, values in notes.items():
+        counter = 0
+        for _, values in notes.items():
             if view_mode == 'return_to_main':
+                counter = 1
                 break
             elif view_mode == 'in_process':
                 if values['status'] == view_mode:
-                    print_note(key, values)
+                    counter +=1 
+                    print_note(values)
+                    
             elif view_mode == 'done':
                 if values['status'] == view_mode:
-                    print_note(key, values)
+                    counter +=1 
+                    print_note(values)
+ 
             elif view_mode == 'archived':
                 if values['status'] == view_mode:
-                    print_note(key, values)
+                    counter +=1 
+                    print_note(values)
+
             elif view_mode == 'all':
-                print_note(key, values)
-            
-        print('-' * 40)
+                counter +=1
+                print_note(values)
+        if counter == 0:
+            print('There are no notes.')
+        else:
+            print('-' * 40)
     else:
         print('Notes data was not loaded.')
                 
@@ -161,18 +172,9 @@ def get_note_values(notes):
                 raise ValueError(f'No title. ID: {key}')
             data.append((key, values['title'], values['text_note'], values['status']))
         except ValueError as error:
-            print(f'An error occurred while creating the note: {error}')
+            print(f'An error occurred while retrieving the data: {error}')
 
     return data
-
-
-def search_note_by_title(notes, id):
-    for key, values in notes.items():
-        if key == id:
-            return key
-
-    print('The title is incorrect or is missing from the database.')
-    return None
     
 
 def delete_note():
@@ -203,6 +205,8 @@ def delete_note():
                 if clarification == 'Yes':
                     notes.pop(note_id)
                     write_file_note(notes)
+                else:
+                    print('Deletion Canceled')
                 
             
     except ValueError as error:
@@ -246,15 +250,17 @@ def edit_note():
             
                 if edit_mode == 'title':
                     new_data = input('Enter a new title: ')
-                    if not new_data:
+                    if not new_data.strip():
                         raise ValueError('Empty fields: Header')
                 elif edit_mode == 'text_note':
                     new_data = input('Enter a new description: ')
-                    if not new_data:
+                    if not new_data.strip():
                         raise ValueError('Empty fields: Description')
                     
                 elif edit_mode == 'deadline':
                     new_data = input('Enter a new deadline: ')
+                    if not new_data.strip():
+                        new_data = None
 
                 elif edit_mode == 'status':
                     new_data = menu('Select a status:',
@@ -270,6 +276,8 @@ def edit_note():
                     notes = edit_note_value(notes, note_id, edit_mode, new_data)
                     notes[note_id]['updated_at'] = datetime.now().isoformat().split('T')
                     write_file_note(notes)
+                else:
+                    print('The change has been canceled')
 
         except ValueError as error:
             print(f'An error occurred while edit the note: {error}')
@@ -309,4 +317,5 @@ def main():
         elif mode == 'close':
             break
 
-main()    
+if __name__ == '__main__':
+    main()   
