@@ -7,11 +7,11 @@
             "22:51:19.615471"
         ],
         "updated_at": [
-            "2026-07-10",
-            "20:31:35.104603"
+            "2026-07-13",
+            "17:42:18.848127"
         ],
         "deadline": "10:00",
-        "status": "done"
+        "status": "in_process"
     },
     "deb0cb2d5e6e4bff909f4510d814563e": {
         "title": "real task",
@@ -52,15 +52,18 @@
         "deadline": "rtehret",
         "status": "in_process"
     },
-    "75d10c8b1674490ba2fe6a38e092f6c7": {
+    "c07d02155d584708bd3485bc93505449": {
         "title": "test0",
-        "text_note": "teskitre",
+        "text_note": "new new new test lol kek",
         "created_at": [
             "2026-07-13",
-            "17:02:06.605756"
+            "17:41:30.229417"
         ],
-        "updated_at": null,
-        "deadline": null,
-        "status": "in_process"
+        "updated_at": [
+            "2026-07-13",
+            "17:42:07.881678"
+        ],
+        "deadline": "today",
+        "status": "done"
     }
 }

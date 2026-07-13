@@ -168,7 +168,7 @@ def get_note_values(notes):
 
 def search_note_by_title(notes, id):
     for key, values in notes.items():
-        if values['title'] == title:
+        if key == id:
             return key
 
     print('The title is incorrect or is missing from the database.')
@@ -187,9 +187,7 @@ def delete_note():
             print('There are no notes in the database.')
         else:
             values_list = get_note_values(notes)
-            selectors = []
-            for id_note, title, desc, status in values_list:
-                selectors.append({"name": f'{title} - {desc[:40]} | Status: {status} | ID: {id[:8]}', "value": id_note})
+            selectors = create_selectors(values_list)
             
             
             selectors.append({'name': 'Return to the main menu', 'value': 'return_to_main'})
@@ -215,16 +213,22 @@ def edit_note_value(notes, id_note, change_value, new_data):
     notes[id_note][change_value] = new_data
     return notes
 
+def create_selectors(values_list):
+    selectors = []
+    for id_note, title, desc, status in values_list:
+        selectors.append({"name": f'{title} - {desc[:40]} | Status: {status} | ID: {id_note[:8]}', "value": id_note})
+    return selectors
 
 def edit_note():
     print('EDIT MENU')
     notes = get_data()
     if notes is not None:
-        titles = get_titles(notes)
+        values_list = get_note_values(notes)
+        selectors = create_selectors(values_list)
         try:
-            if not titles:
+            if not values_list:
                 raise ValueError(f'There are no notes that can be edited.')
-            title = menu('Select a note:', titles)
+            note_id = menu('Select a note:', selectors)
             edit_mode = menu('Select an action:',
                     [
                     {'name': 'Change the title', 'value': 'title'},
@@ -234,8 +238,7 @@ def edit_note():
                     {'name': 'Return to the main menu', 'value': 'return_to_main'}
                     ]
                     )
-
-            note_id = search_note_by_title(notes, title)
+            
             if note_id is None:
                 raise ValueError('Empty fields: id')
 
@@ -261,10 +264,12 @@ def edit_note():
                             {'name': 'Archive', 'value': 'archived'},
                             ]
                             )
+                clarification = menu('Are you sure you want to make changes?', ['Yes', 'No'])
 
-                notes = edit_note_value(notes, note_id, edit_mode, new_data)
-                notes[note_id]['updated_at'] = datetime.now().isoformat().split('T')
-                write_file_note(notes)
+                if clarification == 'Yes':   
+                    notes = edit_note_value(notes, note_id, edit_mode, new_data)
+                    notes[note_id]['updated_at'] = datetime.now().isoformat().split('T')
+                    write_file_note(notes)
 
         except ValueError as error:
             print(f'An error occurred while edit the note: {error}')
